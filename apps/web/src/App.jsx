@@ -105,6 +105,7 @@ export default function App() {
     const userMessage = input.trim()
     if (!userMessage || loading) return
 
+    const history = messages.map(m => ({ role: m.role, content: m.text }))
     setMessages(prev => [...prev, { role: 'user', text: userMessage }])
     setInput('')
     setLoading(true)
@@ -113,7 +114,7 @@ export default function App() {
       const res = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
+        body: JSON.stringify({ message: userMessage, history }),
       })
       const data = await res.json()
       console.log('resposta da api:', data)
