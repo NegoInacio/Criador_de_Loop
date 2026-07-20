@@ -8,17 +8,22 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 await fastify.register(cors, { origin: true })
 
 fastify.post('/chat', async (request, reply) => {
-  const { messages } = request.body
+  const { message } = request.body
 
-  if (!messages || !Array.isArray(messages)) {
-    return reply.status(400).send({ error: 'messages array required' })
+  if (!message || typeof message !== 'string') {
+    return reply.status(400).send({ error: 'message string required' })
   }
+
+  const conversationHistory = []
+  conversationHistory.push({ role: 'user', content: message })
+
+  console.log('conversationHistory:', JSON.stringify(conversationHistory))
 
   try {
     const response = await anthropic.beta.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 4096,
-      messages,
+      messages: conversationHistory,
       mcp_servers: process.env.N8N_MCP_URL ? [
         {
           type: 'url',
@@ -32,7 +37,7 @@ fastify.post('/chat', async (request, reply) => {
       betas: process.env.N8N_MCP_URL ? ['mcp-client-2025-04-04'] : [],
     })
 
-    return reply.send({ message: response.content[0]?.text ?? '' })
+    return reply.send({ response: response.content[0]?.text ?? '' })
   } catch (error) {
     return reply.status(500).send({
       error: error.message || 'Erro ao processar comando'
