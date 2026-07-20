@@ -14,24 +14,21 @@ fastify.post('/chat', async (request, reply) => {
     return reply.status(400).send({ error: 'messages array required' })
   }
 
-  const mcpServers = process.env.N8N_MCP_URL
-    ? [
-        {
-          type: 'url',
-          url: process.env.N8N_MCP_URL,
-          ...(process.env.N8N_MCP_TOKEN && {
-            authorization_token: process.env.N8N_MCP_TOKEN,
-          }),
-        },
-      ]
-    : undefined
-
   const response = await anthropic.beta.messages.create({
     model: 'claude-sonnet-5',
     max_tokens: 4096,
     messages,
-    ...(mcpServers && { mcp_servers: mcpServers }),
-    betas: mcpServers ? ['mcp-client-2025-04-04'] : [],
+    mcp_servers: process.env.N8N_MCP_URL ? [
+      {
+        type: 'url',
+        url: process.env.N8N_MCP_URL,
+        name: 'n8n-mcp',
+        ...(process.env.N8N_MCP_TOKEN && {
+          authorization_token: process.env.N8N_MCP_TOKEN
+        })
+      }
+    ] : undefined,
+    betas: process.env.N8N_MCP_URL ? ['mcp-client-2025-04-04'] : [],
   })
 
   return reply.send({ message: response.content[0]?.text ?? '' })
