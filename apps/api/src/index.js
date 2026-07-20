@@ -39,7 +39,14 @@ fastify.post('/chat', async (request, reply) => {
       betas: process.env.N8N_MCP_URL ? ['mcp-client-2025-04-04'] : [],
     })
 
-    return reply.send({ response: response.content[0]?.text ?? '' })
+    console.log('response content:', JSON.stringify(response.content))
+    const assistantMessage = response.content
+      .filter(block => block.type === 'text')
+      .map(block => block.text)
+      .join('\n')
+    console.log('assistantMessage:', assistantMessage)
+
+    return reply.send({ response: assistantMessage })
   } catch (error) {
     return reply.status(500).send({
       error: error.message || 'Erro ao processar comando'
