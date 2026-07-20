@@ -1,0 +1,13 @@
+{
+  "name": "n8n-commander",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev:web": "yarn workspace n8n-commander-web dev",
+    "dev:api": "yarn workspace n8n-commander-api dev"
+  }
+}
