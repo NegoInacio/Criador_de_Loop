@@ -102,12 +102,10 @@ export default function App() {
   }, [messages, loading])
 
   async function send() {
-    const text = input.trim()
-    if (!text || loading) return
+    const userMessage = input.trim()
+    if (!userMessage || loading) return
 
-    const userMsg = { role: 'user', content: text }
-    const next = [...messages, userMsg]
-    setMessages(next)
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }])
     setInput('')
     setLoading(true)
 
@@ -115,12 +113,14 @@ export default function App() {
       const res = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ message: userMessage })
       })
       const data = await res.json()
-      setMessages([...next, { role: 'assistant', content: data.message }])
+      console.log('resposta da api:', data)
+      const text = data.response || data.error || JSON.stringify(data)
+      setMessages(prev => [...prev, { role: 'assistant', text }])
     } catch {
-      setMessages([...next, { role: 'assistant', content: '⚠ Erro ao conectar com a API.' }])
+      setMessages(prev => [...prev, { role: 'assistant', text: '⚠ Erro ao conectar com a API.' }])
     } finally {
       setLoading(false)
     }
@@ -146,7 +146,7 @@ export default function App() {
         {messages.map((m, i) => (
           <div key={i} style={message(m.role)}>
             <div style={styles.label(m.role)}>{m.role === 'user' ? 'você' : 'claude'}</div>
-            {m.content}
+            {m.text}
           </div>
         ))}
         {loading && <div style={styles.loading}>claude está digitando...</div>}
