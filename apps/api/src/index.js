@@ -18,6 +18,8 @@ fastify.post('/chat', async (request, reply) => {
   conversationHistory.push({ role: 'user', content: message })
 
   console.log('conversationHistory:', JSON.stringify(conversationHistory))
+  console.log('N8N_MCP_URL:', process.env.N8N_MCP_URL)
+  console.log('mcp_servers:', JSON.stringify(process.env.N8N_MCP_URL ? [{ type: 'url', url: process.env.N8N_MCP_URL, name: 'n8n-mcp' }] : undefined))
 
   try {
     const response = await anthropic.beta.messages.create({
